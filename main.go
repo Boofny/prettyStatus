@@ -1,4 +1,5 @@
 package main
+//TODO: want to add a border that hugs the wall of the terminal screen but not right on the edge
 
 import (
 	"flag"
@@ -71,10 +72,10 @@ func newModel(timeout time.Duration) mainModel {
 	fmt.Println(*colorFlag)
 	m.color = colorMap[*colorFlag]
 
-	m.hour1 = t[0] - '0'
-	m.hour2 = t[1] - '0'
-	m.minute1 = t[3] - '0'
-	m.minute2 = t[4] - '0'
+	m.hour1 = t[0]
+	m.hour2 = t[1]
+	m.minute1 = t[3]
+	m.minute2 = t[4]
 	m.timeM = t[5] == 'P'
 	m.timer = timer.New(timeout)
 	return m
@@ -98,11 +99,11 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   case tickMsg:
 		t := time.Now().Local().Format("03:04PM")
 
-		m.hour1 = t[0] - '0'
-		m.hour2 = t[1] - '0'
-		m.minute1 = t[3] - '0'
-		m.minute2 = t[4] - '0'
-		m.timeM = t[5] == 'P'
+		m.hour1 = t[0]
+		m.hour2 = t[1]
+		m.minute1 = t[3]
+		m.minute2 = t[4]
+		m.timeM = t[5] == 'P' // just checks if true or not
 
     return m, tick()
 	case tea.WindowSizeMsg:
@@ -122,17 +123,18 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m mainModel) View() string {
 	var s string
+	s += helpStyle.Render("\nI am a mesage from the top\n")
 	s += lipgloss.JoinHorizontal(lipgloss.Top, 
 	modelStyle.Render(m.color + fonts.Rebels[m.hour1]), // 0 - 8
 	modelStyle.Render(m.color + fonts.Rebels[m.hour2]),
-	modelStyle.Render(m.color + fonts.Rebels[10]),// always the :
+	modelStyle.Render(m.color + fonts.Rebels[':']),// always the :
 	modelStyle.Render(m.color + fonts.Rebels[m.minute1]),
 	modelStyle.Render(m.color + fonts.Rebels[m.minute2]),
 	timeStyle.Render(m.color + func () string{
 		if m.timeM {
-			return fonts.Rebels[12]
+			return fonts.Rebels['P']
 		}else{
-			return fonts.Rebels[11]
+			return fonts.Rebels['A']
 		}
 	}())) // 11 is am 12 is pm
 
