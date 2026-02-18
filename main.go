@@ -38,29 +38,25 @@ var (
 			Width(14).
 			Height(5).
 			Align(lipgloss.Center, lipgloss.Center, lipgloss.Center).
-			// BorderStyle(lipgloss.NormalBorder()). BorderForeground(lipgloss.Color("69"))
+			// BorderStyle(lipgloss.NormalBorder()). BorderForeground(lipgloss.Color("69")).
 			BorderStyle(lipgloss.HiddenBorder())
 	timeStyle = lipgloss.NewStyle().
 			Width(30).
 			Height(5).
 			Align(lipgloss.Center, lipgloss.Center, lipgloss.Center).
-			// BorderStyle(lipgloss.NormalBorder()). BorderForeground(lipgloss.Color("69"))
 			BorderStyle(lipgloss.HiddenBorder())
 	helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
-	// windowStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder()).Align(lipgloss.Center).Padding(12)
+	dateStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#E29450"))
 )
 
 type mainModel struct {
 	state   sessionState
 	timer   timer.Model
-	// contentMap map[string]fonts.Font
-	// content string
-	index   int8
+	index uint8
 	hour1, hour2, minute1, minute2 byte
 	timeM bool
-	// timeString []string
 	width, height int
-	color string// using escape codes 
+	color string //using escape codes 
 }
 
 func newModel(timeout time.Duration) mainModel {
@@ -121,11 +117,13 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   return m, nil
 }
 
-var dates = time.Now().Weekday().String() // you get the point
+var dates = time.Now().Local().Format("Mon") // you get the point
+var num = time.Now().Local().Day() // you get the point
 
 func (m mainModel) View() string {
+	dis := fmt.Sprintf("%s, %d", dates, num)
 	var s string
-	s += helpStyle.Render("\n", dates, "\n")
+	s += dateStyle.Render("\n", dis, "\n")
 	s += lipgloss.JoinHorizontal(lipgloss.Top, 
 	modelStyle.Render(m.color + fonts.Rebels[m.hour1]), // 0 - 8
 	modelStyle.Render(m.color + fonts.Rebels[m.hour2]),
