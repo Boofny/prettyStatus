@@ -53,14 +53,14 @@ var (
 type mainModel struct {
 	state   sessionState
 	timer   timer.Model
-	contentMap map[string]fonts.Font
-	content string
-	index   int
+	// contentMap map[string]fonts.Font
+	// content string
+	index   int8
 	hour1, hour2, minute1, minute2 byte
 	timeM bool
-	timeString []string
+	// timeString []string
 	width, height int
-	color string // using escape codes 
+	color string// using escape codes 
 }
 
 func newModel(timeout time.Duration) mainModel {
@@ -121,9 +121,11 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   return m, nil
 }
 
+var dates = time.Now().Weekday().String() // you get the point
+
 func (m mainModel) View() string {
 	var s string
-	s += helpStyle.Render("\nI am a mesage from the top\n")
+	s += helpStyle.Render("\n", dates, "\n")
 	s += lipgloss.JoinHorizontal(lipgloss.Top, 
 	modelStyle.Render(m.color + fonts.Rebels[m.hour1]), // 0 - 8
 	modelStyle.Render(m.color + fonts.Rebels[m.hour2]),
