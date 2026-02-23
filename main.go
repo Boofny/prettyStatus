@@ -1,4 +1,5 @@
 package main
+
 //TODO: want to add a border that hugs the wall of the terminal screen but not right on the edge
 
 import (
@@ -46,7 +47,9 @@ var (
 			Align(lipgloss.Center, lipgloss.Center, lipgloss.Center).
 			BorderStyle(lipgloss.HiddenBorder())
 	helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
-	dateStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#E29450"))
+	dayStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("")).Width(14).Height(5).Align(lipgloss.Center).PaddingLeft(1)
+	dateStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("")).Width(45).Height(5).Align(lipgloss.Left).PaddingRight(1)
+	monthStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("")).Width(40).Height(5).Align(lipgloss.Right)
 )
 
 type mainModel struct {
@@ -54,6 +57,8 @@ type mainModel struct {
 	timer   timer.Model
 	index uint8
 	hour1, hour2, minute1, minute2 byte
+	day1, day2 byte
+	date, month uint8
 	timeM bool
 	width, height int
 	color string //using escape codes 
@@ -61,6 +66,10 @@ type mainModel struct {
 
 func newModel(timeout time.Duration) mainModel {
 	m := mainModel{state: timerView}
+
+	dates := time.Now().Local().Weekday() // you get the point
+	month := time.Now().Local().Month()
+	num := time.Now().Local().Day()// you get the point
 
 	t := time.Now().Local().Format("03:04PM")
 	colorFlag := flag.String("C", "", "color flag needs a value of red, green, yellow, blue, magenta, cyan, white")
@@ -74,6 +83,10 @@ func newModel(timeout time.Duration) mainModel {
 	m.minute2 = t[4]
 	m.timeM = t[5] == 'P'
 	m.timer = timer.New(timeout)
+	m.day1 = byte(num/10 + '0')
+	m.day2 = byte(num%10 + '0')
+	m.date = uint8(dates)
+	m.month = uint8(month)
 	return m
 }
 
@@ -117,13 +130,15 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   return m, nil
 }
 
-var dates = time.Now().Local().Format("Mon") // you get the point
-var num = time.Now().Local().Day() // you get the point
 
 func (m mainModel) View() string {
-	dis := fmt.Sprintf("%s, %d", dates, num)
 	var s string
-	s += dateStyle.Render("\n", dis, "\n")
+	// s += dateStyle.Render(m.color + fonts.RebelsDates[m.date])
+	s += lipgloss.JoinHorizontal(lipgloss.Center, 
+	monthStyle.Render(m.color + fonts.RebelsMonths[m.month]), 
+	dateStyle.Render(m.color + fonts.RebelsDates[m.date]), 
+	dayStyle.Render(m.color + fonts.Rebels[m.day1]), 
+	dayStyle.Render(m.color + fonts.Rebels[m.day2]))
 	s += lipgloss.JoinHorizontal(lipgloss.Top, 
 	modelStyle.Render(m.color + fonts.Rebels[m.hour1]), // 0 - 8
 	modelStyle.Render(m.color + fonts.Rebels[m.hour2]),
